@@ -1,0 +1,12 @@
+{
+    "id": "putrescent",
+    "name": "Putrescent",
+    "author": [
+        "tomatose",
+        "pangaea47"
+    ],
+    "description": "Yo, Burger?",
+    "prefix": "putr",
+    "main_file": "Putrescent.lua",
+    "version": "0.0.0"
+}
