@@ -2,6 +2,21 @@ print("=-- Loading Localization (Putrescent - EN-US)");
 
 return {
     descriptions = {
+        Mod = {
+            putrescent = {
+                name = "Putrescent",
+                text = {
+                    "{s:1.4}Keep an eye out, should your runs take",
+                    "{s:1.4}a more {s:1.55,C:dark_edition}dire{s:1.4} turn...",
+                    "{s:3.2} ",
+                    "{C:inactive,s:1.2}Mod made by {C:attention,s:1.4,T:j_putr_argel}pangaea47",
+                    "{C:inactive,s:0.9}with help from the following:",
+                    "{C:legendary,s:1.0,T:j_putr_tomatose}tomatose{C:inactive,s:0.8} / {C:enhanced,s:1.0,T:j_putr_lizzie}lanedarushpy{C:inactive,s:0.8} / {C:red,s:1.0,T:j_putr_mf}notmario",
+                    "{C:inactive,s:0.8}(hover for more info)"
+                }
+            }
+        },
+
         Cataclysm = {
             -- c_putr_[card_name_here]
 

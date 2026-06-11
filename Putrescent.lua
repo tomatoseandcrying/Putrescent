@@ -25,4 +25,5 @@ local function load_dir(subfolder)
     end
 end
 
+load_dir("source/extras");
 load_dir("source/consumables");
