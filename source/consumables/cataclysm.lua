@@ -22,215 +22,293 @@ SMODS.ConsumableType {
     select_card = "consumeables"
 };
 
+PUTR.Cataclysm = SMODS.Consumable:extend{
+	object_type = "Consumable",
+	set = "Colour",
+    
+    cost = 7, -- change ?
+    display_size = { w = 83, h = 103 },
+    atlas = "putr_CataclysmSprites",
+
+	set_ability = function(self, card, initial, delay_sprites)
+		card.ability.active = false
+	end,
+
+	can_use = function(self, card)
+        if card.area == G.shop_jokers and G.shop_jokers then return false end
+        if card.ability.active then
+            if card.config.center.can_use_active then return card.config.center.can_use_active(self, card) end
+        else
+            if card.config.center.can_use_inactive then return card.config.center.can_use_inactive(self, card) end
+        end
+		return false
+	end,
+
+    use = function(self, card, area)
+        if card.ability.active then
+            if card.config.center.use_active then card.config.center.use_active(self, card) end
+        else
+            if card.config.center.use_inactive then card.config.center.use_inactive(self, card) end
+
+            card.ability.active = true
+            card.ability.rounds_remaining = card.ability.rounds
+            G.consumeables:remove_card(card);
+            G.putr_cataclysms:emplace(card);
+            PUTR.shrink_card(card);
+        end
+	end,
+
+    keep_on_use = function(self, card)
+        return not card.ability.active
+    end,
+}
+
 -- Deluge
-SMODS.Consumable {
+PUTR.Cataclysm {
     key = "deluge",
     set = "Cataclysm",
-
-    display_size = { w = 83, h = 103 },
-    atlas = "CataclysmSprites",
     pos = { x = 0, y = 0 },
 }
 
 -- Doomsday
-SMODS.Consumable {
+PUTR.Cataclysm {
     key = "doomsday",
     set = "Cataclysm",
-
-    display_size = { w = 83, h = 103 },
-    atlas = "CataclysmSprites",
     pos = { x = 1, y = 0 },
 }
 
 -- Paroxysm
-SMODS.Consumable {
+PUTR.Cataclysm {
     key = "paroxysm",
     set = "Cataclysm",
-
-    display_size = { w = 83, h = 103 },
-    atlas = "CataclysmSprites",
     pos = { x = 2, y = 0 },
 }
 
 -- Invasion
-SMODS.Consumable {
+PUTR.Cataclysm {
     key = "invasion",
     set = "Cataclysm",
-
-    display_size = { w = 83, h = 103 },
-    atlas = "CataclysmSprites",
     pos = { x = 3, y = 0 },
+
+    config = { rounds = 2, },
+    can_use_inactive = function(self, card)
+        return true
+    end,
+    can_use_active = function(self, card)
+        return true
+    end,
+    use_inactive = function(self, card)
+        card.ability.stored_discards = G.GAME.round_resets.discards
+        G.GAME.round_resets.discards = G.GAME.round_resets.discards - card.ability.stored_discards
+        ease_discard(-card.ability.stored_discards)
+    end,
+    use_active = function(self, card)
+        G.GAME.round_resets.discards = G.GAME.round_resets.discards + card.ability.stored_discards
+        ease_discard(card.ability.stored_discards)
+
+        G.consumeables.config.card_limit = G.consumeables.config.card_limit + 2
+    end,
 }
 
 -- Absolution
-SMODS.Consumable {
+PUTR.Cataclysm {
     key = "absolution",
     set = "Cataclysm",
-
-    display_size = { w = 83, h = 103 },
-    atlas = "CataclysmSprites",
     pos = { x = 4, y = 0 },
 }
 
 -- Plague
-SMODS.Consumable {
+PUTR.Cataclysm {
     key = "plague",
     set = "Cataclysm",
-
-    display_size = { w = 83, h = 103 },
-    atlas = "CataclysmSprites",
     pos = { x = 5, y = 0 },
 }
 
 -- Disaster
-SMODS.Consumable {
+PUTR.Cataclysm {
     key = "disaster",
     set = "Cataclysm",
-
-    display_size = { w = 83, h = 103 },
-    atlas = "CataclysmSprites",
     pos = { x = 6, y = 0 },
 }
 
 -- Collision
-SMODS.Consumable {
+PUTR.Cataclysm {
     key = "collision",
     set = "Cataclysm",
-
-    display_size = { w = 83, h = 103 },
-    atlas = "CataclysmSprites",
     pos = { x = 7, y = 0 },
 }
 
 -- Takeover
-SMODS.Consumable {
+PUTR.Cataclysm {
     key = "takeover",
     set = "Cataclysm",
-
-    display_size = { w = 83, h = 103 },
-    atlas = "CataclysmSprites",
     pos = { x = 8, y = 0 },
 }
 
 -- Maleficence
-SMODS.Consumable {
+PUTR.Cataclysm {
     key = "maleficence",
     set = "Cataclysm",
-
-    display_size = { w = 83, h = 103 },
-    atlas = "CataclysmSprites",
     pos = { x = 0, y = 1 },
 }
 
 -- Rip
-SMODS.Consumable {
+PUTR.Cataclysm {
     key = "rip",
     set = "Cataclysm",
-
-    display_size = { w = 83, h = 103 },
-    atlas = "CataclysmSprites",
     pos = { x = 1, y = 1 },
 }
 
 -- Crunch
-SMODS.Consumable {
+PUTR.Cataclysm {
     key = "crunch",
     set = "Cataclysm",
-
-    display_size = { w = 83, h = 103 },
-    atlas = "CataclysmSprites",
     pos = { x = 2, y = 1 },
 }
 
 -- Heat Death
-SMODS.Consumable {
+PUTR.Cataclysm {
     key = "heat_death",
     set = "Cataclysm",
-
-    display_size = { w = 83, h = 103 },
-    atlas = "CataclysmSprites",
     pos = { x = 3, y = 1 },
 }
 
 -- Vacuum Decay
-SMODS.Consumable {
+PUTR.Cataclysm {
     key = "vacuum_decay",
     set = "Cataclysm",
-
-    display_size = { w = 83, h = 103 },
-    atlas = "CataclysmSprites",
     pos = { x = 4, y = 1 },
 }
 
 -- Occulture
-SMODS.Consumable {
+PUTR.Cataclysm {
     key = "occulture",
     set = "Cataclysm",
-
-    display_size = { w = 83, h = 103 },
-    atlas = "CataclysmSprites",
     pos = { x = 5, y = 1 },
 }
 
 -- Postexistence
-SMODS.Consumable {
+PUTR.Cataclysm {
     key = "postexistence",
     set = "Cataclysm",
-
-    display_size = { w = 83, h = 103 },
-    atlas = "CataclysmSprites",
     pos = { x = 6, y = 1 },
 }
 
 -- Stagnancy
-SMODS.Consumable {
+PUTR.Cataclysm {
     key = "stagnancy",
     set = "Cataclysm",
-
-    display_size = { w = 83, h = 103 },
-    atlas = "CataclysmSprites",
     pos = { x = 7, y = 1 },
 }
 
 -- Tempest
-SMODS.Consumable {
+PUTR.Cataclysm {
     key = "tempest",
     set = "Cataclysm",
-
-    display_size = { w = 83, h = 103 },
-    atlas = "CataclysmSprites",
     pos = { x = 8, y = 1 },
 }
 
 -- Damnation
-SMODS.Consumable {
+PUTR.Cataclysm {
     key = "damnation",
     set = "Cataclysm",
-
-    display_size = { w = 83, h = 103 },
-    atlas = "CataclysmSprites",
     pos = { x = 1, y = 2 },
 }
 
 -- Black Hole Sun
-SMODS.Consumable {
+PUTR.Cataclysm {
     key = "black_hole_sun",
     set = "Cataclysm",
-
-    display_size = { w = 83, h = 103 },
-    atlas = "CataclysmSprites",
     pos = { x = 2, y = 2 },
 }
 
 -- Anathema
-SMODS.Consumable {
+PUTR.Cataclysm {
     key = "anathema",
     set = "Cataclysm",
-
-    display_size = { w = 83, h = 103 },
-    atlas = "CataclysmSprites",
     pos = { x = 3, y = 2 },
 }
+
+
+
+-- miracle display
+
+PUTR.custom_card_areas = function(game)
+	game.putr_cataclysms = CardArea(
+		game.consumeables.T.x, game.consumeables.T.y - 0.6,
+        game.consumeables.T.w, 0.5,
+        { card_limit = 9999, type = 'joker', highlight_limit = 0, no_card_count = true, }
+	)
+end
+
+local ca_rfh = CardArea.remove_from_highlighted
+function CardArea:remove_from_highlighted(card, force)
+    if card then
+        ca_rfh(self, card, force)
+    end
+end
+
+local ca_ath = CardArea.add_to_highlighted
+function CardArea:add_to_highlighted(card, silent)
+    if card and card.area ~= G.putr_cataclysms then
+        ca_ath(self, card, silent)
+    end
+end
+
+-- thank you alexi !!!
+
+--- Shrinks a card
+function PUTR.shrink_card(card, instant)
+    if card.putr_scale_collision then return nil end
+    card.putr_scale_collision = true
+
+    if instant then
+        card.T.scale = card.T.scale * 0.25
+        card.VT.scale = card.VT.scale * 0.25
+    else
+        ease_value(card.T, "scale", -card.T.scale * (1 - 0.25), nil, "REAL", nil, 0.02, "outquad")
+    end
+end
+
+function PUTR.unshrink_card(card, instant)
+    if not card.putr_scale_collision then return nil end
+    card.putr_scale_collision = false
+
+    if instant then
+        card.T.scale = card.T.scale / 0.25
+        card.VT.scale = card.VT.scale / 0.25
+    else
+        ease_value(card.T, "scale", card.T.scale * 3, nil, "REAL", nil, 0.02, "outquad")
+    end
+end
+
+local mju = Moveable.juice_up
+function Moveable:juice_up(amount, rot_amt, ...)
+    local ret = mju(self, amount, rot_amt, ...)
+
+    if G.SETTINGS.reduced_motion then return end
+    if self.putr_scale_collision then
+        self.VT.scale = self.VT.scale * self.T.scale
+    end
+    return ret
+end
+
+local game_start_run = Game.start_run
+function Game:start_run(args)
+    game_start_run(self, args)
+    if G.putr_cataclysms then
+        if G.bcats_miracles and not G.GAME.putr_bcats_fix then
+            G.GAME.putr_bcats_fix = true
+            G.bcats_miracles.T.w = G.bcats_miracles.T.w * 0.45
+            G.putr_cataclysms.T.w = G.putr_cataclysms.T.w * 0.45
+            G.putr_cataclysms.T.x = G.putr_cataclysms.T.x + G.bcats_miracles.T.w * 0.55 / 0.45
+        end
+
+        for _, card in ipairs(G.putr_cataclysms.cards) do
+            PUTR.shrink_card(card, true)
+        end
+    end
+end
 
 --- End Debug
 if PUTR.debug then print("=-- Successfully loaded!") end

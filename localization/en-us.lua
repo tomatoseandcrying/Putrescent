@@ -55,7 +55,12 @@ return {
                 name = "Invasion",
                 text = {
                     {
-                        "{C:inactive}Placeholder description"
+                        "When used, sets discards",
+                        "to {C:red}0{} for {C:attention}2{} rounds"
+                    },
+                    {
+                        "After this, returns discards and",
+                        "gives {C:attention}+2{} consumable slots"
                     }
                 }
             },
