@@ -2,8 +2,7 @@
     "id": "putrescent",
     "name": "Putrescent",
     "author": [
-        "tomatose",
-        "pangaea47"
+        "pangaea47", "tomatose"
     ],
     "description": "Yo, Burger?",
     "prefix": "putr",
