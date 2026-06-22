@@ -13,6 +13,8 @@ PUTR.calculate = function(self, context)
 					colour = G.C.RED,
 					card = card,
 				})
+				
+				card.ability.active = true;
 			else
 				local str = card.ability.rounds_remaining .. "/" .. card.ability.rounds
 				card_eval_status_text(card, "extra", nil, nil, nil, {

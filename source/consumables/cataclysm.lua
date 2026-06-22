@@ -7,7 +7,14 @@ SMODS.Atlas {
     path = "cataclysmcards.png",
     px = 83,
     py = 103
-}
+};
+
+SMODS.Atlas {
+    key = "CataclysmIndicators",
+    path = "cataindicators.png",
+    px = 23,
+    py = 23
+};
 
 --- Cataclysm Cards Consumable Type
 SMODS.ConsumableType {
@@ -31,8 +38,72 @@ PUTR.Cataclysm = SMODS.Consumable:extend{
     atlas = "putr_CataclysmSprites",
 
 	set_ability = function(self, card, initial, delay_sprites)
-		card.ability.active = false
+        card.ability.active = false
+        card.ability.default_pos = card.config.center.pos;
+        card.ability.default_atlas = card.config.center.atlas;
+        card.ability.default_vt_scale = card.VT.scale;
+        card.ability.default_t_scale = card.T.scale;
 	end,
+
+    set_indicator = function(self, card, shrink)
+        if not card.config.center.indicator then return false end
+        local indicator = card.config.center.indicator
+
+        if shrink then
+            -- card.T.scale = 0.34
+            -- card.VT.scale = 0.34
+            card.T.h = G.CARD_H*(indicator.display_size.h/95)*4
+            card.T.w = G.CARD_W*(indicator.display_size.w/71)*4
+            
+            card.children.center:remove()
+            card.children.center = SMODS.create_sprite(card.T.x, card.T.y, card.T.w, card.T.h, G.ASSET_ATLAS[indicator.atlas_key], indicator.pos)
+            card.children.center.states.hover = card.states.hover
+            card.children.center.states.click = card.states.click
+            card.children.center.states.drag = card.states.drag
+            card.children.center.states.collide.can = false
+            card.children.center:set_role({major = card, role_type = 'Glued', draw_major = card})
+            -- card.children.center.atlas = G.ASSET_ATLAS[indicator.atlas_key];
+            -- -- card.children.center.scale = { x = card.children.center.atlas.px, y = card.children.center.atlas.py }
+            -- card.children.center:set_sprite_pos(indicator.pos);
+        else
+            card.T.scale = card.ability.default_t_scale * indicator.scale_mod
+            card.VT.scale = card.ability.default_vt_scale * indicator.scale_mod
+            card.T.h = G.CARD_H*(indicator.display_size.h/23)
+            card.T.w = G.CARD_W*(indicator.display_size.w/23)
+
+            card.children.center:remove()
+            card.children.center = SMODS.create_sprite(card.T.x, card.T.y, card.T.w, card.T.h, card.ability.default_atlas, card.ability.default_pos)
+            card.children.center.states.hover = card.states.hover
+            card.children.center.states.click = card.states.click
+            card.children.center.states.drag = card.states.drag
+            card.children.center.states.collide.can = false
+            card.children.center:set_role({major = card, role_type = 'Glued', draw_major = card})
+            -- card.children.center.atlas = card.ability.default_atlas;
+            -- card.children.center:set_sprite_pos({ x = card.ability.default_pos.x, y = card.ability.default_pos.y });
+        end
+
+        card:juice_up(0.3, 0.2);
+    end,
+
+    update = function(self, card, dt)
+        if not card.config.center.indicator then return end
+        if card.ability.active then
+            if card.ability.indicating then
+                card.ability.indicating = false;
+                card.config.center.set_indicator(card.config.center, card, false);
+            end
+            return
+        end
+        if (not not not card.ability.indicating) and card.T.scale <= card.ability.default_t_scale * card.config.center.indicator.scale_mod * 1.2 then
+            if card.children.center.atlas ~= G.ASSET_ATLAS[card.config.center.indicator.atlas_key] then
+                card.config.center.set_indicator(card.config.center, card, true);
+                card.ability.indicating = true;
+            end
+        elseif card.children.center.atlas ~= card.ability.default_atlas and card.ability.indicating and card.T.scale > card.ability.default_t_scale / card.config.center.indicator.scale_mod * 1.2 then
+            card.config.center.set_indicator(card.config.center, card, false);
+            card.ability.indicating = false;
+        end
+    end,
 
 	can_use = function(self, card)
         if card.area == G.shop_jokers and G.shop_jokers then return false end
@@ -46,11 +117,11 @@ PUTR.Cataclysm = SMODS.Consumable:extend{
 
     use = function(self, card, area)
         if card.ability.active then
-            if card.config.center.use_active then card.config.center.use_active(self, card) end
+            if card.config.center.use_active then
+                card.config.center.use_active(self, card)
+            end
         else
             if card.config.center.use_inactive then card.config.center.use_inactive(self, card) end
-
-            card.ability.active = true
             card.ability.rounds_remaining = card.ability.rounds
             G.consumeables:remove_card(card);
             G.putr_cataclysms:emplace(card);
@@ -89,6 +160,12 @@ PUTR.Cataclysm {
     key = "invasion",
     set = "Cataclysm",
     pos = { x = 3, y = 0 },
+    indicator = { 
+        atlas_key = "putr_CataclysmIndicators", 
+        pos = { x = 3, y = 0 },
+        display_size = { w = 23, h = 23 },
+        scale_mod = 0.25
+    },
 
     config = { rounds = 2, },
     can_use_inactive = function(self, card)
@@ -258,13 +335,22 @@ end
 -- thank you alexi !!!
 
 --- Shrinks a card
-function PUTR.shrink_card(card, instant)
+function PUTR.shrink_card(card, instant, indicator)
+    indicator = indicator or {};
     if card.putr_scale_collision then return nil end
     card.putr_scale_collision = true
+    card.config.center.default_atlas = card.config.center.default_atlas or card.children.center.atlas;
+    card.config.center.default_pos = card.config.center.default_pos or card.config.center.pos;
 
     if instant then
-        card.T.scale = card.T.scale * 0.25
-        card.VT.scale = card.VT.scale * 0.25
+        if #indicator < 1 then
+            card.T.scale = card.T.scale * 0.25
+            card.VT.scale = card.VT.scale * 0.25
+
+            card.children.center.atlas = card.config.center.default_atlas;
+        else
+            card.config.center.set_indicator(card.config.center, card, true);
+        end
     else
         ease_value(card.T, "scale", -card.T.scale * (1 - 0.25), nil, "REAL", nil, 0.02, "outquad")
     end
@@ -272,11 +358,22 @@ end
 
 function PUTR.unshrink_card(card, instant)
     if not card.putr_scale_collision then return nil end
+    card.config.center.default_atlas = card.config.center.default_atlas or card.children.center.atlas;
+    card.config.center.default_pos = card.config.center.default_pos or card.config.center.pos;
     card.putr_scale_collision = false
+    
+    if card.config.center.set_indicator then
+        card.config.center.set_indicator(card.config.center, card, false);
+    end
+    card.ability.indicating = false;
 
     if instant then
-        card.T.scale = card.T.scale / 0.25
-        card.VT.scale = card.VT.scale / 0.25
+        if #indicator < 1 then
+            card.T.scale = card.T.scale / 0.25
+            card.VT.scale = card.VT.scale / 0.25
+        else
+            card.config.center.set_indicator(card.config.center, card, false);
+        end
     else
         ease_value(card.T, "scale", card.T.scale * 3, nil, "REAL", nil, 0.02, "outquad")
     end
